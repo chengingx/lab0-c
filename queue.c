@@ -54,6 +54,9 @@ void q_free(struct list_head *head)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+
     element_t *q_node = malloc(sizeof(element_t));
 
     if (!q_node)
@@ -63,8 +66,6 @@ bool q_insert_head(struct list_head *head, char *s)
 
     if (!q_node->value) {
         q_release_element(q_node);
-        free(q_node);
-
         return false;
     }
 
@@ -82,6 +83,9 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+
     element_t *q_node = malloc(sizeof(element_t));
 
     if (!q_node)
@@ -91,8 +95,6 @@ bool q_insert_tail(struct list_head *head, char *s)
 
     if (!q_node->value) {
         q_release_element(q_node);
-        free(q_node);
-
         return false;
     }
 
@@ -124,8 +126,10 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 
     list_del_init(&removed_node->list);
 
-    strncpy(sp, removed_node->value, bufsize - 1);
-    sp[bufsize - 1] = '\0';
+    if (sp) {
+        strncpy(sp, removed_node->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
+    }
 
     return removed_node;
 }
@@ -143,8 +147,10 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 
     list_del_init(&removed_node->list);
 
-    strncpy(sp, removed_node->value, bufsize - 1);
-    sp[bufsize - 1] = '\0';
+    if (sp) {
+        strncpy(sp, removed_node->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
+    }
 
     return removed_node;
 }
@@ -276,10 +282,10 @@ struct list_head *mergeTwoLists(struct list_head *left, struct list_head *right)
     struct list_head *head = NULL, **ptr = &head, **node = NULL;
 
     for (; left && right; *node = (*node)->next) {
-        node = strcmp(list_entry(left, element_t, list)->value,
-                      list_entry(right, element_t, list)->value)
-                   ? &right
-                   : &left;
+        node = (strcmp(list_entry(left, element_t, list)->value,
+                       list_entry(right, element_t, list)->value) < 0)
+                   ? &left
+                   : &right;
         *ptr = *node;
         ptr = &(*ptr)->next;
     }
