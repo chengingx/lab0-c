@@ -762,6 +762,49 @@ static bool do_show(int argc, char *argv[])
     return show_queue(0);
 }
 
+static bool q_shuffle(struct list_head *head)
+{
+    if (!head)
+        return false;
+
+    int size = q_size(head);
+
+    while (size) {
+        int number = rand() % size;
+        struct list_head *tmp = head->next;
+
+        for (int i = 0; i < number; i++)
+            tmp = tmp->next;
+
+        list_del(tmp);
+        list_add_tail(tmp, head);
+        size--;
+    }
+
+    return true;
+}
+
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (argc != 1) {
+        report(1, "%s takes no arguments", argv[0]);
+        return false;
+    }
+
+    if (!l_meta.l)
+        report(3, "Warning: Try to access null queue");
+    error_check();
+
+    bool ok = true;
+    if (exception_setup(true))
+        ok = q_shuffle(l_meta.l);
+    exception_cancel();
+
+    show_queue(3);
+
+    return ok && !error_check();
+}
+
 static void console_init()
 {
     ADD_COMMAND(new, "                | Create new queue");
@@ -795,6 +838,7 @@ static void console_init()
         dedup, "                | Delete all nodes that have duplicate string");
     ADD_COMMAND(swap,
                 "                | Swap every two adjacent nodes in queue");
+    ADD_COMMAND(shuffle, "                | Shuffle nodes in queue");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
@@ -891,7 +935,6 @@ static bool sanity_check()
     return true;
 }
 
-
 #define BUFSIZE 256
 int main(int argc, char *argv[])
 {
@@ -906,6 +949,8 @@ int main(int argc, char *argv[])
     char *logfile_name = NULL;
     int level = 4;
     int c;
+
+    srand(time(NULL));
 
     while ((c = getopt(argc, argv, "hv:f:l:")) != -1) {
         switch (c) {
