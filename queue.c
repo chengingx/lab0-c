@@ -65,7 +65,7 @@ bool q_insert_head(struct list_head *head, char *s)
     q_node->value = strdup(s);
 
     if (!q_node->value) {
-        q_release_element(q_node);
+        free(q_node);
         return false;
     }
 
@@ -124,7 +124,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 
     element_t *removed_node = list_first_entry(head, element_t, list);
 
-    list_del_init(&removed_node->list);
+    list_del(&removed_node->list);
 
     if (sp) {
         strncpy(sp, removed_node->value, bufsize - 1);

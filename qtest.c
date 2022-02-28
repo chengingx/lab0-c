@@ -948,7 +948,7 @@ int main(int argc, char *argv[])
     linenoiseSetCompletionCallback(completion);
 
     linenoiseHistorySetMaxLen(HISTORY_LEN);
-    linenoiseHistoryLoad(HISTORY_FILE); /* Load the history at startup */
+    // linenoiseHistoryLoad(HISTORY_FILE); /* Load the history at startup */
     set_verblevel(level);
     if (level > 1) {
         set_echo(true);
@@ -960,7 +960,7 @@ int main(int argc, char *argv[])
 
     bool ok = true;
     ok = ok && run_console(infile_name);
-    ok = ok && finish_cmd();
+    ok = finish_cmd() && ok;
 
     return ok ? 0 : 1;
 }
